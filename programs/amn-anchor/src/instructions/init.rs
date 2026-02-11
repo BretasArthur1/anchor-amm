@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{associated_token::AssociatedToken, token::{Mint, Token, TokenAccount}};
 
-use crate::state::Config;
+use crate::{errors::AmmError, state::Config};
 
 
 
@@ -40,7 +40,7 @@ pub struct Init<'info> {
         payer = init_user,
         seeds = [b"config", seed.to_le_bytes().as_ref()],
         bump,
-        space = Config::INIT_SPACE,
+        space = 8 + Config::INIT_SPACE,
     )]
     pub config: Account<'info, Config>,
     pub token_program: Program<'info, Token>,
@@ -50,6 +50,9 @@ pub struct Init<'info> {
 
 impl<'info> Init<'info> {
     pub fn init(&mut self, seed: u64, fee: u16, authority: Option<Pubkey>, bumps: InitBumps) -> Result<()> {
+        // Fee is in basis points (1/100th of a percent). Max 100% = 10000 bps.
+        require!(fee <= 10000, AmmError::InvalidFee);
+
         self.config.set_inner(Config {
             seed,
             authority,
