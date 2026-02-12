@@ -39,6 +39,10 @@ pub enum AmmError {
     InsufficientBalance,
     #[msg("Zero balance.")]
     ZeroBalance,
+    #[msg("Initial deposit too small. Minimum liquidity required to prevent price manipulation.")]
+    InitialDepositTooSmall,
+    #[msg("Unauthorized.")]
+    Unauthorized,
 }
 
 impl From<CurveError> for AmmError {
