@@ -6,3 +6,5 @@ pub mod withdraw;
 pub use withdraw::*;
 pub mod swap;
 pub use swap::*;
+pub mod toggle_lock;
+pub use toggle_lock::*;

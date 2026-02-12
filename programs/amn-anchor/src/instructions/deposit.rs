@@ -48,8 +48,7 @@ pub struct Deposit<'info> {
     )]
     pub user_y: Account<'info, TokenAccount>,
     #[account(
-        init_if_needed,
-        payer = user,
+        mut,
         associated_token::mint = mint_lp,
         associated_token::authority = user,
     )]
@@ -69,8 +68,14 @@ impl<'info> Deposit<'info> {
         require!(self.config.locked == false, AmmError::PoolLocked);
         require!(amount != 0, AmmError::InvalidAmount);
 
+        // Minimum initial liquidity to prevent first-depositor price manipulation
+        const MINIMUM_INITIAL_LIQUIDITY: u64 = 1_000;
+
         let (x, y) = match self.mint_lp.supply == 0 && self.vault_x.amount == 0 && self.vault_y.amount == 0 {
-            true => (max_x, max_y),
+            true => {
+                require!(max_x >= MINIMUM_INITIAL_LIQUIDITY && max_y >= MINIMUM_INITIAL_LIQUIDITY, AmmError::InitialDepositTooSmall);
+                (max_x, max_y)
+            },
             false => {
                 let amounts = ConstantProduct::xy_deposit_amounts_from_l(
                     self.vault_x.amount, 

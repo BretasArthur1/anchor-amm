@@ -11,15 +11,13 @@ pub struct Swap<'info> {
     pub mint_x: Account<'info, Mint>,
     pub mint_y: Account<'info, Mint>,
     #[account(
-        init_if_needed,
-        payer = user,
+        mut,
         associated_token::mint = mint_x,
         associated_token::authority = user,
     )]
     pub user_x: Account<'info, TokenAccount>,
     #[account(
-        init_if_needed,
-        payer = user,
+        mut,
         associated_token::mint = mint_y,
         associated_token::authority = user,
     )]
